@@ -141,15 +141,6 @@ function Board() {
         console.error("이미지 업로드 오류:", error);
       });
   };
-  const convertData = () => {
-    Axios.post("http://localhost:3001/convert")
-      .then((response) => {
-        alert(response.data.message);
-      })
-      .catch((error) => {
-        console.error("Convert 오류:", error);
-      });
-  };
   const getValue = e => {
     const { name, value } = e.target;
     setMovieContent({
@@ -240,9 +231,6 @@ function Board() {
           }}
         />
       </div>
-      <button className="convert-button" onClick={convertData}>
-        변환하기
-      </button>
       <button
         className="submit-button"
         onClick={submitReview}

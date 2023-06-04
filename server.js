@@ -174,58 +174,6 @@ app.post("/api/insert", (req, res) => {
   });
 });
 
-const ffmpeg = require('fluent-ffmpeg');
-const fs = require('fs');
-const { Dropbox } = require('dropbox');
-const dropbox = new Dropbox({ accessToken: 'sl.BfSOJ9Cb9qWRWwtl6oLcz5w1PBtE-yX1Fm_WzT9oTHCQlIv_PY_1HXvjwEd4IJpayN8gxE_gtxHqAUOr9wHR-JfpB5ZTfaZBhmcPcXPoFKAHIcNdqv8ENK3Afj8XKRficGvVcu0' });
-
-app.post("/api/convert", async (req, res) => {
-  try {
-     // 드롭박스에서 파일 다운로드
-     const file = await dropbox.filesDownload({ path: "/11-20-00.mp4" });
-     // MP4 파일을 버퍼에 저장
-     const mp4Data = file.fileBinary;
-    // 기존 파일명을 유지한 채로 새로운 파일명 생성
-    const timestamp = Date.now();
-    const outputFileName = `output_${timestamp}.gif`;
-
-    // 출력 파일 경로 설정
-    const outputFilePath = path.join(__dirname, "images", outputFileName);
-
-    // MP4 파일을 GIF로 변환
-    ffmpeg(mp4Data)
-      .output(outputFilePath)
-      .on('end', async () => {
-        // GIF 파일 변환 완료 후, URL을 생성하여 데이터베이스에 저장
-        const gifUrl = `/images/${outputFileName}`;
-
-        // simpleboard 테이블에 데이터 삽입
-        const title = outputFileName;
-        const content = req.body.content + `<img src="${gifUrl}" alt="gif">`;
-
-        const sqlQuery = "INSERT INTO simpleboard (title, content) VALUES (?, ?)";
-        db.query(sqlQuery, [title, content], (err, result) => {
-          if (err) {
-            console.log(err);
-            res.status(500).send("Internal Server Error");
-          } else {
-            res.status(200).send("Conversion and insertion complete!");
-          }
-        });
-      })
-      .on('error', (err) => {
-        console.error(err);
-        res.status(500).send("Conversion failed!");
-      })
-      .run();
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
-
-
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
